@@ -5,6 +5,7 @@
 
 > **Foundational Mandate:**
 > *"The HTTP/4 protocol will allow decentralized real time streaming via torrent protocol called not QUIC but WIQC."*
+> *Description: "WIQC (Web-Integrated QUIC-derived Content-swarming Protocol)"*
 
 ## Overview
 
