@@ -1,0 +1,840 @@
+
+
+
+
+HTTP Working Group                                              S. Enger
+Internet-Draft                                                       ESE
+Intended status: Experimental                          November 18, 2026
+Expires: May 22, 2027
+
+
+  HTTP/4: Mapping HTTP Semantics over the WIQC Decentralized Real-Time
+                       Torrent Transport Protocol
+                   draft-enger-httpbis-http4-wiqc-00
+
+Abstract
+
+   This document specifies HTTP/4, an application-layer mapping of HTTP
+   semantics over a decentralized, peer-to-peer real-time streaming
+   transport protocol named WIQC (Web-Integrated QUIC-derived Content-
+   swarming).  By design, the HTTP/4 protocol allows decentralized real-
+   time streaming via a torrent protocol called not QUIC but WIQC.
+   While HTTP/3 delegates stream multiplexing and congestion control to
+   unicast client-server QUIC connections, HTTP/4 extends these
+   capabilities to multipoint peer swarms.  WIQC integrates encrypted
+   UDP stream multiplexing with fine-grained cryptographic block
+   verification using SHA-256 Merkle hash trees, live sliding-window
+   chunk addressing, Unified Merkle Tree signatures for low-latency live
+   streams, mutual peer authentication without centralized certificate
+   authorities, and native UDP hole punching.  This specification
+   defines the wire framing, stream mapping, swarm discovery headers,
+   real-time object prioritization, and security properties required to
+   operate HTTP/4 natively across decentralized networks.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on May 22, 2027.
+
+
+
+
+
+
+Enger                     Expires May 22, 2027                  [Page 1]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (https://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+1.  Introduction
+
+   The architectural evolution of the Hypertext Transfer Protocol has
+   progressively decoupled high-level application semantics [RFC9110]
+   from underlying transport bindings.  While HTTP/1.1 and HTTP/2 rely
+   primarily on Transmission Control Protocol (TCP) connections, HTTP/3
+   [RFC9114] maps HTTP semantics onto the QUIC transport protocol
+   [RFC9000] to eliminate transport-layer head-of-line blocking and
+   reduce handshake latency.  However, HTTP/3 remains fundamentally
+   bound to a centralized, unicast client-server topology.  Real-time
+   media delivery and large-scale content distribution over HTTP/3 still
+   require centralized Content Delivery Network (CDN) relay
+   infrastructures [I-D.ietf-moq-transport].
+
+   This document establishes the foundational mandate for the next
+   generation of web transport:
+
+   The HTTP/4 protocol will allow decentralized real time streaming via
+   torrent protocol called not QUIC but WIQC.
+
+   To fulfill this mandate, this specification defines WIQC (Web-
+   Integrated QUIC-derived Content-swarming) as the underlying transport
+   layer for HTTP/4.  Rather than treating a resource origin as a single
+   IP endpoint, HTTP/4 treats content representations and live media
+   tracks as cryptographically verifiable swarms.  Peers participating
+   in an HTTP/4 exchange simultaneously act as consumers and relays,
+   exchanging independent streams and unreliable datagrams [RFC9221]
+   across a decentralized mesh.
+
+   WIQC synthesizes four core protocol mechanisms into a unified
+   transport layer:
+
+
+
+
+
+Enger                     Expires May 22, 2027                  [Page 2]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   1.  Multiplexed Encrypted Framing: Derived from [RFC9000], providing
+       connection migration, 0-RTT/1-RTT setup, and independent per-
+       stream flow control.
+
+   2.  Real-Time Swarm Integrity and Torrent Framing: Incorporating the
+       bin-based chunk addressing, Live Discard Window, and Unified
+       Merkle Tree live signature mechanisms of the Peer-to-Peer
+       Streaming Peer Protocol (PPSPP) [RFC7574] alongside the 16 KiB
+       SHA-256 Merkle leaf verification of BitTorrent v2 [BEP52].
+
+   3.  Sub-Second Media Hierarchy: Adapting the Track, Group, Subgroup,
+       and Object data model of Media over QUIC Transport
+       [I-D.ietf-moq-transport] so that each Subgroup maps to an
+       independent unidirectional WIQC stream for immediate peer-to-peer
+       forwarding and Earliest Deadline First (EDF) scheduling.
+
+   4.  Decentralized Mutual Authentication and NAT Traversal: Utilizing
+       self-signed X.509 certificates carrying the libp2p Public Key
+       Extension [LIBP2P-TLS] over TLS 1.3 [RFC9846] and native path-
+       probing frames [I-D.seemann-quic-nat-traversal] to establish
+       direct peer-to-peer paths across Network Address Translators
+       (NATs).
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   This document uses the variable-length integer encoding and packet
+   formatting conventions defined in Section 1.3 of [RFC9000].
+
+   The following terms are used throughout this specification:
+
+   o  WIQC Endpoint: A network node implementing the WIQC transport
+      protocol capable of simultaneously initiating and accepting swarm
+      streams as both an HTTP/4 client (subscriber/leecher) and an
+      HTTP/4 peer server (publisher/seeder).
+
+   o  Swarm Identifier (Swarm ID): A cryptographic identifier uniquely
+      representing an HTTP/4 resource or live stream.  For static
+      representations, the Swarm ID is the 32-byte SHA-256 Merkle root
+      (pieces root) [BEP52].  For live streams, the Swarm ID is the
+      public key fingerprint of the origin publisher [RFC7574].
+
+
+
+
+
+Enger                     Expires May 22, 2027                  [Page 3]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   o  Leaf Block: The smallest unit of cryptographic verification in
+      WIQC, fixed at 16 KiB (16,384 bytes) in accordance with [BEP52].
+
+   o  Munro Hash: An interior node root of a power-of-two subtree within
+      a Unified Merkle Tree [RFC7574] that is cryptographically signed
+      by the live origin publisher via a SIGNED_INTEGRITY frame to
+      authenticate dynamically generated live streaming chunks.
+
+   o  Subgroup Stream: A unidirectional WIQC stream carrying a sequence
+      of media or data Objects that share a delivery priority and
+      decoding dependency [I-D.ietf-moq-transport].
+
+3.  The WIQC Transport Protocol Architecture
+
+3.1.  Relationship to QUIC and Peer-to-Peer Swarming
+
+   WIQC preserves the UDP packet framing, long and short headers,
+   connection IDs, and per-stream reliability mechanisms of [RFC9000],
+   but replaces the asymmetric client-server session model with a
+   symmetric swarm channel model.  A single HTTP/4 logical request can
+   be satisfied concurrently by multiple WIQC connections to distinct
+   peers participating in the same Swarm ID.
+
+   Figure 1 illustrates the architectural layering of HTTP/4 over WIQC
+   compared to HTTP/2 and HTTP/3:
+
+   +----------------------------------------------------------------+
+   |                   HTTP Semantics (RFC 9110)                    |
+   +-------------------+--------------------+-----------------------+
+   | HTTP/2 (RFC 9113) | HTTP/3 (RFC 9114)  |   HTTP/4 over WIQC    |
+   +-------------------+--------------------+-----------------------+
+   |   HPACK Framing   | QPACK + H3 Frames  | QPACK + RFC 9421 Sig. |
+   +-------------------+--------------------+-----------------------+
+   | TLS 1.2/1.3 (PKIX)| QUIC Streams(9000) | MOQT Subgroups + EDF  |
+   +-------------------+--------------------+-----------------------+
+   | TCP (Single Stream| TLS 1.3 (CA PKIX)  | WIQC Swarm (RFC7574)  |
+   +-------------------+--------------------+-----------------------+
+   |    IP / Unicast   |    UDP / Unicast   | Mutual TLS 1.3        |
+   +-------------------+--------------------+-----------------------+
+   |                   |                    | UDP + Hole Punching   |
+   +-------------------+--------------------+-----------------------+
+
+           Figure 1: HTTP/4 over WIQC Protocol Stack Comparison
+
+
+
+
+
+
+
+
+Enger                     Expires May 22, 2027                  [Page 4]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+3.2.  Swarm Handshake and Channel Multiplexing
+
+   During connection establishment or stream initialization, WIQC
+   endpoints exchange swarm capabilities derived from [RFC7574] and
+   [BEP52]:
+
+   1.  Swarm Metadata Negotiation: Endpoints negotiate the Swarm
+       Identifier (Option Code 2), Content Integrity Protection Method
+       (Option Code 3), Merkle Hash Tree Function (Option Code 4, fixed
+       to SHA-256, code 0x02), Chunk Addressing Method (Option Code 6,
+       defaulting to 64-bit bins, code 0x03), and Live Discard Window
+       (Option Code 7) as defined in [RFC7574].
+
+   2.  Anti-Amplification Rule: In accordance with [RFC7574] and
+       [RFC9000], an initiating peer's first flight MUST NOT contain
+       heavy payloads (such as DATA or SIGNED_INTEGRITY frames) prior to
+       address validation via channel ID echoing or QUIC PATH_RESPONSE
+       verification.
+
+3.3.  Cryptographic Integrity: Static and Live Torrent Modes
+
+   Because HTTP/4 peers receive byte ranges and real-time media frames
+   from untrusted swarm participants, transport-level TLS 1.3 encryption
+   [RFC9846] only protects the hop-by-hop channel.  End-to-end content
+   integrity MUST be verified at the block or object level before data
+   is passed to the HTTP/4 application or forwarded to other peers:
+
+   o  Static Content Mode (BEP 52 Merkle Mode): Content is divided into
+      16 KiB leaf blocks hashed with SHA-256 into a binary Merkle tree
+      [BEP52].  Peers exchange standard peer wire protocol messages (IDs
+      21, 22, and 23 for hash request, hashes, and hash reject) to fetch
+      missing uncle hashes required to verify a 16 KiB block immediately
+      upon arrival.  Corrupt blocks are discarded immediately, and the
+      offending peer is isolated.
+
+   o  Decentralized Real-Time Streaming Mode (Unified Merkle Tree Mode):
+      Since the total stream length is unknown ahead of time in live
+      streaming, WIQC utilizes Content Integrity Protection Method 3
+      (Unified Merkle Tree) from [RFC7574].  As the publisher generates
+      new groups of real-time chunks, it computes the binary subtree
+      root (the munro hash) covering the newly generated bin range,
+      signs the munro hash using its private key, and distributes
+      SIGNED_INTEGRITY and INTEGRITY frames across the swarm.  Receiving
+      peers verify each chunk against its munro branch before playback
+      and immediately re-seed verified chunks to downstream peers.
+
+
+
+
+
+
+Enger                     Expires May 22, 2027                  [Page 5]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+4.  Real-Time Streaming and Swarm Scheduling in HTTP/4
+
+4.1.  Media Data Model Mapping
+
+   To achieve sub-second real-time latency across a decentralized
+   torrent swarm, HTTP/4 adopts the hierarchical data model of
+   [I-D.ietf-moq-transport]:
+
+   o  Track: Identified by a tuple of Track Namespace (bound to the
+      HTTP/4 :authority and :path pseudo-headers) and Track Name (e.g.,
+      video bitrate variant, audio channel, or catalog track).
+
+   o  Group: A temporally bounded collection of objects starting at an
+      independent synchronization point (such as an IDR keyframe),
+      directly aligned with a WIQC Unified Merkle Tree munro subtree.
+
+   o  Subgroup: A subset of objects within a Group sharing a common
+      priority and dependency chain.  Each Subgroup MUST be mapped to
+      exactly one unidirectional WIQC stream.  If packet loss occurs on
+      a lower-priority enhancement layer Subgroup, higher-priority base
+      layer Subgroups proceed without head-of-line blocking.
+
+   o  Object: The smallest addressable media unit (e.g., a single
+      encoded video frame or Low Overhead Container (LOC) payload).
+
+4.2.  Hybrid Earliest Deadline First (EDF) and Rarest-First Scheduling
+
+   Traditional torrent protocols rely purely on Rarest-First piece
+   selection, which maximizes swarm diversity but ignores playback
+   deadlines.  Conversely, purely sequential fetching causes swarm
+   starvation.  WIQC endpoints implementing HTTP/4 real-time streaming
+   MUST implement a dual-zone sliding window scheduler within the
+   negotiated Live Discard Window [RFC7574], extending HTTP priority
+   signaling [RFC9218]:
+
+   1.  Emergency Priority Zone (EDF Zone): For chunks whose playback
+       deadline falls within a configurable threshold (e.g., < 150 ms),
+       the peer requests missing Subgroups strictly in Earliest Deadline
+       First (EDF) order from the lowest-RTT unchoked peers.
+
+   2.  Swarm Health Zone (Rarest-First Zone): For chunks further ahead
+       in the Live Discard Window, the peer uses remaining bandwidth to
+       request the rarest chunks announced via HAVE frames, ensuring
+       robust piece availability across the swarm.
+
+   Figure 2 depicts the dual-zone sliding window scheduler and wire-
+   level frame multiplexing in WIQC:
+
+
+
+
+Enger                     Expires May 22, 2027                  [Page 6]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   |<---------------- Live Discard Window (RFC 7574) --------------->|
+   +---------------------------------+-------------------------------+
+   |  Emergency Zone (< 150 ms)      |     Swarm Health Zone         |
+   |  Scheduler: Strictly EDF        |     Scheduler: Rarest-First   |
+   |  Target: Lowest-RTT Peers       |     Target: HAVE Bin Diversity|
+   +---------------------------------+-------------------------------+
+           |                                         |
+           v                                         v
+   +-----------------------------------------------------------------+
+   | WIQC Subgroup Stream (0x40): [MOQT Object] + [WIQC_INTEGRITY]   |
+   | WIQC Swarm Control   (0x41): [WIQC_HAVE]   + [SIGNED_INTEGRITY] |
+   +-----------------------------------------------------------------+
+
+       Figure 2: WIQC Dual-Zone Real-Time Swarm Scheduler and Stream
+                                 Pipeline
+
+5.  Expressing HTTP Semantics over WIQC
+
+5.1.  HTTP/4 Stream Mapping
+
+   HTTP/4 preserves the stream categories of [RFC9114] while introducing
+   swarm-specific stream types:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Enger                     Expires May 22, 2027                  [Page 7]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   +--------+-----------+----------------+-----------------------------+
+   | Stream | Stream    | Directionality | Purpose in HTTP/4 over WIQC |
+   | Type   | Name      |                |                             |
+   | ID     |           |                |                             |
+   +--------+-----------+----------------+-----------------------------+
+   | 0x00   | Control   | Unidirectional | Carries SETTINGS, GOAWAY,   |
+   |        | Stream    | (pair)         | MAX_PUSH_ID, and swarm      |
+   |        |           |                | capabilities.               |
+   |        |           |                |                             |
+   | 0x01   | Push      | Unidirectional | Server- or peer-initiated   |
+   |        | Stream    |                | push of promised HTTP/4     |
+   |        |           |                | representations.            |
+   |        |           |                |                             |
+   | 0x02   | QPACK     | Unidirectional | Dynamic header table        |
+   |        | Encoder   |                | insertions per [RFC9204].   |
+   |        |           |                |                             |
+   | 0x03   | QPACK     | Unidirectional | Header table                |
+   |        | Decoder   |                | acknowledgments and stream  |
+   |        |           |                | cancellations per           |
+   |        |           |                | [RFC9204].                  |
+   |        |           |                |                             |
+   | 0x40   | WIQC      | Unidirectional | Carries a single real-time  |
+   |        | Swarm     |                | media Subgroup alongside    |
+   |        | Subgroup  |                | its Merkle INTEGRITY proof. |
+   |        |           |                |                             |
+   | 0x41   | WIQC      | Bidirectional  | Exchanges HAVE, REQUEST,    |
+   |        | Swarm     |                | CANCEL, CHOKE, UNCHOKE, and |
+   |        | Control   |                | SIGNED_INTEGRITY frames.    |
+   +--------+-----------+----------------+-----------------------------+
+
+5.2.  HTTP/4 Frame Layout and Extensions
+
+   All HTTP/4 frames follow the variable-length integer framing layout
+   of Section 7.1 of [RFC9114]: Type (i), Length (i), and Frame Payload
+   (..).  In addition to DATA (0x00), HEADERS (0x01), CANCEL_PUSH
+   (0x03), SETTINGS (0x04), PUSH_PROMISE (0x05), GOAWAY (0x07), and
+   MAX_PUSH_ID (0x0d), HTTP/4 defines the following WIQC swarm frames:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Enger                     Expires May 22, 2027                  [Page 8]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   +--------+-----------------------+-----------+----------------------+
+   | Frame  | Frame Name            | Permitted | Description          |
+   | Type   |                       | Streams   |                      |
+   +--------+-----------------------+-----------+----------------------+
+   | 0x4101 | WIQC_HAVE             | WIQC      | Announces possession |
+   |        |                       | Swarm     | of verified 64-bit   |
+   |        |                       | Control   | bin ranges           |
+   |        |                       |           | [RFC7574].           |
+   |        |                       |           |                      |
+   | 0x4102 | WIQC_INTEGRITY        | WIQC      | Carries uncle hashes |
+   |        |                       | Swarm     | or Merkle branch     |
+   |        |                       | Subgroup  | proofs [RFC7574]     |
+   |        |                       | / Control | [BEP52].             |
+   |        |                       |           |                      |
+   | 0x4103 | WIQC_SIGNED_INTEGRITY | WIQC      | Carries publisher-   |
+   |        |                       | Swarm     | signed munro root    |
+   |        |                       | Subgroup  | hashes for live      |
+   |        |                       | / Control | streaming [RFC7574]. |
+   |        |                       |           |                      |
+   | 0x4104 | WIQC_PEX              | Control / | Peer Exchange        |
+   |        |                       | WIQC      | (PEX_RESv4,          |
+   |        |                       | Swarm     | PEX_RESv6, PEX_REQ)  |
+   |        |                       | Control   | for trackerless      |
+   |        |                       |           | discovery [RFC7574]. |
+   +--------+-----------------------+-----------+----------------------+
+
+5.3.  HTTP Header Fields for Swarm Integrity and Origin Authentication
+
+   When initiating a request or responding over HTTP/4, endpoints
+   combine standard HTTP integrity and signature headers with WIQC swarm
+   metadata:
+
+   1.  Representation Digest (Repr-Digest and Content-Digest): In
+       accordance with [RFC9530], static HTTP/4 responses MUST include a
+       Repr-Digest header encoding the SHA-256 root hash, accompanied by
+       a Swarm-Root dictionary field carrying the BEP 52 pieces root.
+
+   2.  Origin Message Signatures (Signature-Input and Signature):
+       Because HTTP/4 responses may be assembled from multiple untrusted
+       peers, the origin server signs the response metadata (@status,
+       content-type, repr-digest, and wiqc-swarm-id) using [RFC9421].
+       Any peer in the swarm can forward the signed header block, and
+       any receiving client can cryptographically verify that the
+       metadata originated from the authoritative publisher.
+
+   3.  Alternative Service and Discovery: Transition from unicast HTTP/3
+       [RFC7838] or DNS resolution via SVCB/HTTPS records [RFC9460] to
+       HTTP/4 swarms is accomplished by advertising "h4" ALPN endpoints.
+
+
+
+Enger                     Expires May 22, 2027                  [Page 9]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   4.  HTTP Datagrams and Capsule Protocol: Ultra-low-latency unreliable
+       media objects MAY be transmitted via QUIC DATAGRAM frames
+       [RFC9221] associated with an HTTP/4 request stream, or
+       encapsulated via the DATAGRAM Capsule (0x00) per [RFC9297] when
+       traversing HTTP intermediaries.
+
+6.  Decentralized Peer Authentication and NAT Traversal
+
+6.1.  Mutual TLS 1.3 with Self-Signed Peer Identity
+
+   In a decentralized torrent swarm, peers typically lack domain names
+   and cannot obtain certificates from commercial PKIX Certificate
+   Authorities (CAs).  Therefore, WIQC mandates mutual authentication
+   over TLS 1.3 [RFC9846] using the libp2p TLS handshake mechanism
+   [LIBP2P-TLS]:
+
+   o  Both dialing and listening WIQC endpoints MUST present a single
+      self-signed X.509 certificate during the TLS 1.3 handshake (chains
+      longer than one certificate MUST cause connection termination).
+
+   o  The certificate MUST include the libp2p Public Key Extension
+      identified by Object Identifier (OID) 1.3.6.1.4.1.53594.1.1.
+
+   o  The extension contains an ASN.1-encoded SignedKey structure
+      holding the peer's public host key (e.g., Ed25519) and a
+      cryptographic signature over the concatenation of the ASCII string
+      "libp2p-tls-handshake:" and the DER-encoded SubjectPublicKeyInfo
+      of the ephemeral certificate key.
+
+   o  For browser-based HTTP/4 endpoints operating over WebTransport,
+      where the browser enforces CA checks or certificate pinning,
+      endpoints MAY authenticate peers by embedding the certificate hash
+      (certhash) in the peer advertisement and performing an in-band
+      cryptographic binding handshake on the first stream.
+
+6.2.  Native WIQC NAT Traversal
+
+   To enable direct peer-to-peer streaming between home and mobile nodes
+   behind NATs without relying on external ICE/STUN/TURN stacks, WIQC
+   incorporates the native QUIC NAT traversal extension
+   [I-D.seemann-quic-nat-traversal]:
+
+   o  Well-connected relay or seed peers inform joining peers of their
+      external UDP socket address using the OBSERVED_ADDRESS frame.
+
+   o  Peers advertise candidate addresses over existing swarm
+      connections using ADD_ADDRESS (0x3d7e90..0x3d7e91) and
+      REMOVE_ADDRESS (0x3d7e94) frames, and coordinate simultaneous UDP
+
+
+
+Enger                     Expires May 22, 2027                 [Page 10]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+      hole punching via PUNCH_ME_NOW (0x3d7e92..0x3d7e93) or grant-based
+      PUNCH_REQUEST frames followed by standard PATH_CHALLENGE and
+      PATH_RESPONSE validation [RFC9000].
+
+7.  Formal Syntax (ABNF)
+
+   The following Augmented Backus-Naur Form (ABNF) grammar [RFC5234]
+   defines the syntax of the WIQC-Swarm-Info HTTP header field and the
+   h4 Alternative Service discovery token:
+
+   WIQC-Swarm-Info = "swarm-id=" byte-sequence ";"
+                     "mode=" ( "merkle-v2" / "unified-live" )
+                     [ ";window=" 1*DIGIT ]
+                     [ ";chunk-addr=" ( "bin32" / "bin64" ) ]
+
+   byte-sequence   = ":" *( BASE64CHAR ) ":"
+   BASE64CHAR      = ALPHA / DIGIT / "+" / "/" / "="
+
+   h4-alpn-id      = %x68.34 ; "h4" in ASCII
+   wiqc-alpn-id    = %x77.69.71.63 ; "wiqc" in ASCII
+
+8.  Security Considerations
+
+   This section analyzes the threat model of HTTP/4 over WIQC in
+   accordance with [RFC3552].
+
+8.1.  Stream Pollution Attacks in Decentralized Swarms
+
+   In peer-to-peer live streaming, a malicious peer with high upload
+   bandwidth can inject corrupted chunks ("pollution attack") to degrade
+   playback across the swarm.  WIQC mitigates this by enforcing
+   mandatory cryptographic verification before forwarding: every 16 KiB
+   block in static mode is verified against the SHA-256 Merkle root
+   [BEP52], and every live chunk in Unified Merkle Tree mode is verified
+   against a publisher-signed munro hash [RFC7574].  Merkle-tree
+   chaining keeps cryptographic verification bandwidth overhead around
+   5% (as evaluated under 128-bit MD5 and 1024-bit RSA reference
+   parameters) while enabling deterministic identification and immediate
+   banning of polluting peers.
+
+8.2.  Reflection and Amplification Attacks
+
+   Because WIQC operates over UDP, unverified source IP addresses pose a
+   reflection amplification risk.  Endpoints MUST enforce the anti-
+   amplification limits of [RFC9000] and MUST echo the peer's randomly
+   chosen Channel ID per Section 12.1 of [RFC7574] before transmitting
+   heavy payloads such as DATA or SIGNED_INTEGRITY messages.
+
+
+
+
+Enger                     Expires May 22, 2027                 [Page 11]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+8.3.  Compression Side Channels and Replay Risks
+
+   When using QPACK [RFC9204] in HTTP/4, endpoints MUST NOT compress
+   sensitive authentication tokens alongside attacker-controlled data
+   within the same dynamic table context (Section 10.6 of [RFC9114]).
+   Furthermore, 0-RTT swarm requests MUST only be used for idempotent
+   operations (such as subscribing to public live tracks) to prevent
+   replay attacks.
+
+9.  IANA Considerations
+
+9.1.  ALPN Protocol ID Registration
+
+   This document requests IANA to register the following Application-
+   Layer Protocol Negotiation (ALPN) IDs in the "TLS Application-Layer
+   Protocol Negotiation (ALPN) Protocol IDs" registry:
+
+   o  Protocol: HTTP/4 over WIQC
+
+   o  Identification Sequence: 0x68 0x34 ("h4")
+
+   o  Reference: This document
+
+   o  Protocol: Raw WIQC Swarm Transport
+
+   o  Identification Sequence: 0x77 0x69 0x71 0x63 ("wiqc")
+
+   o  Reference: This document
+
+9.2.  HTTP Header Field Registration
+
+   This document requests registration of the WIQC-Swarm-Info field in
+   the "Hypertext Transfer Protocol (HTTP) Field Name Registry" per
+   [RFC9110] with status experimental.
+
+10.  References
+
+10.1.  Normative References
+
+   [BEP52]    Authors, B., "The BitTorrent Protocol Specification v2",
+              BEP 52, September 2020,
+              <https://www.bittorrent.org/beps/bep_0052.html>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+Enger                     Expires May 22, 2027                 [Page 12]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, RFC 5234,
+              DOI 10.17487/RFC5234, January 2008,
+              <https://www.rfc-editor.org/info/rfc5234>.
+
+   [RFC7574]  Bakker, A., Petrocco, R., and V. Grishchenko, "Peer-to-
+              Peer Streaming Peer Protocol (PPSPP)", RFC 7574,
+              DOI 10.17487/RFC7574, July 2015,
+              <https://www.rfc-editor.org/info/rfc7574>.
+
+   [RFC7838]  Nottingham, M., McManus, P., and J. Reschke, "HTTP
+              Alternative Services", RFC 7838, DOI 10.17487/RFC7838,
+              April 2016, <https://www.rfc-editor.org/info/rfc7838>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+   [RFC9000]  Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
+              Multiplexed and Secure Transport", RFC 9000,
+              DOI 10.17487/RFC9000, May 2021,
+              <https://www.rfc-editor.org/info/rfc9000>.
+
+   [RFC9110]  Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
+              Ed., "HTTP Semantics", STD 97, RFC 9110,
+              DOI 10.17487/RFC9110, June 2022,
+              <https://www.rfc-editor.org/info/rfc9110>.
+
+   [RFC9114]  Bishop, M., Ed., "HTTP/3", RFC 9114, DOI 10.17487/RFC9114,
+              June 2022, <https://www.rfc-editor.org/info/rfc9114>.
+
+   [RFC9204]  Krasic, C., Bishop, M., and A. Frindell, Ed., "QPACK:
+              Field Compression for HTTP/3", RFC 9204,
+              DOI 10.17487/RFC9204, June 2022,
+              <https://www.rfc-editor.org/info/rfc9204>.
+
+   [RFC9218]  Oku, K. and L. Pardue, "Extensible Prioritization Scheme
+              for HTTP", RFC 9218, DOI 10.17487/RFC9218, June 2022,
+              <https://www.rfc-editor.org/info/rfc9218>.
+
+   [RFC9221]  Pauly, T., Kinnear, E., and D. Schinazi, "An Unreliable
+              Datagram Extension to QUIC", RFC 9221,
+              DOI 10.17487/RFC9221, March 2022,
+              <https://www.rfc-editor.org/info/rfc9221>.
+
+   [RFC9297]  Schinazi, D. and L. Pardue, "HTTP Datagrams and the
+              Capsule Protocol", RFC 9297, DOI 10.17487/RFC9297, August
+              2022, <https://www.rfc-editor.org/info/rfc9297>.
+
+
+
+Enger                     Expires May 22, 2027                 [Page 13]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   [RFC9421]  Backman, A., Ed., Richer, J., Ed., and M. Sporny, "HTTP
+              Message Signatures", RFC 9421, DOI 10.17487/RFC9421,
+              February 2024, <https://www.rfc-editor.org/info/rfc9421>.
+
+   [RFC9460]  Schwartz, B., Bishop, M., and E. Nygren, "Service Binding
+              and Parameter Specification via the DNS (SVCB and HTTPS
+              Resource Records)", RFC 9460, DOI 10.17487/RFC9460,
+              November 2023, <https://www.rfc-editor.org/info/rfc9460>.
+
+   [RFC9530]  Polli, R. and L. Pardue, "Digest Fields", RFC 9530,
+              DOI 10.17487/RFC9530, February 2024,
+              <https://www.rfc-editor.org/info/rfc9530>.
+
+   [RFC9846]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
+              Version 1.3", RFC 9846, DOI 10.17487/RFC9846, July 2026,
+              <https://www.rfc-editor.org/info/rfc9846>.
+
+10.2.  Informative References
+
+   [I-D.ietf-moq-transport]
+              Nandakumar, S., Vasiliev, V., Swett, I., and A. Frindell,
+              "Media over QUIC Transport", draft-ietf-moq-transport-23
+              (work in progress), November 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-moq-
+              transport-23>.
+
+   [I-D.seemann-quic-nat-traversal]
+              Seemann, M. and E. Kinnear, "Using QUIC to traverse NATs",
+              draft-seemann-quic-nat-traversal-04 (work in progress),
+              November 2026, <https://datatracker.ietf.org/doc/html/
+              draft-seemann-quic-nat-traversal-04>.
+
+   [LIBP2P-TLS]
+              Protocol Labs, "libp2p TLS 1.3 Handshake Specification",
+              2024,
+              <https://github.com/libp2p/specs/blob/master/tls/tls.md>.
+
+   [RFC3552]  Rescorla, E. and B. Korver, "Guidelines for Writing RFC
+              Text on Security Considerations", BCP 72, RFC 3552,
+              DOI 10.17487/RFC3552, July 2003,
+              <https://www.rfc-editor.org/info/rfc3552>.
+
+Appendix A.  Acknowledgements
+
+   This specification synthesizes foundational work by the IETF HTTP
+   Working Group, the QUIC Working Group, the Media over QUIC (MOQ)
+   Working Group, the Peer-to-Peer Streaming Protocol (PPSP) Working
+
+
+
+
+Enger                     Expires May 22, 2027                 [Page 14]
+
+Internet-Draft              HTTP/4 over WIQC               November 2026
+
+
+   Group, the BitTorrent BEP 52 authors, and the libp2p specification
+   community.
+
+Author's Address
+
+   Sebastian Enger
+   Einzelunternehmen Sebastian Enger
+   Linienstrasse 11
+   Brandenburg an der Havel  D-14776
+   Germany
+
+   Email: Sebastian.Enger@Gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Enger                     Expires May 22, 2027                 [Page 15]
