@@ -9,6 +9,8 @@
 
 ## Overview
 
+Draft published at ([`https://datatracker.ietf.org/doc/draft-enger-httpbis-http4-wiqc/`](https://datatracker.ietf.org/doc/draft-enger-httpbis-http4-wiqc/).
+
 This repository ([`sebastianenger1981/http4-wiqc-spec`](https://github.com/sebastianenger1981/http4-wiqc-spec)) hosts the formal architectural specification and IETF Internet-Draft (`draft-enger-httpbis-http4-wiqc-00`) for **HTTP/4**, an application-layer mapping of HTTP Semantics (RFC 9110) over a decentralized, peer-to-peer real-time streaming transport protocol named **WIQC** (*Web-Integrated QUIC-derived Content-swarming*).
 
 While HTTP/3 (RFC 9114) maps HTTP semantics onto unicast client-server QUIC connections (RFC 9000), it remains dependent on centralized origin servers and Content Delivery Network (CDN) relays. **HTTP/4 over WIQC** replaces the unicast transport model with a cryptographically verified peer-to-peer mesh. Participating endpoints simultaneously consume and relay multiplexed media streams and static representations across a decentralized swarm with sub-second latency.
