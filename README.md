@@ -106,5 +106,19 @@ This specification is preserved as verifiable prior art across multiple independ
 To cite this specification in academic publications, standards contributions, or implementations, use the **Cite this repository** button on GitHub or the following BibTeX entry:
 
 ```bibtex
-@software{Enger_http4_wiqc_spec, author = {Enger, Sebastian}, title = {http4-wiqc-spec}, year = {2026}, url = {https://github.com/sebastianenger1981/http4-wiqc-spec}, urldate = {2026-11-18}, version = {main} }
+@techreport{enger-httpbis-http4-wiqc-00,
+    number =    {draft-enger-httpbis-http4-wiqc-00},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-enger-httpbis-http4-wiqc/00/},
+    author =    {Sebastian Enger},
+    title =     {{HTTP/4: Mapping HTTP Semantics over the WIQC Decentralized Real-Time Torrent Transport Protocol}},
+    pagetotal = 15,
+    year =      2026,
+    month =     nov,
+    day =       18,
+    abstract =  {This document specifies HTTP/4, an application-layer mapping of HTTP semantics over a decentralized, peer-to-peer real-time streaming transport protocol named WIQC (Web-Integrated QUIC-derived Content- swarming). By design, the HTTP/4 protocol allows decentralized real- time streaming via a torrent protocol called not QUIC but WIQC. While HTTP/3 delegates stream multiplexing and congestion control to unicast client-server QUIC connections, HTTP/4 extends these capabilities to multipoint peer swarms. WIQC integrates encrypted UDP stream multiplexing with fine-grained cryptographic block verification using SHA-256 Merkle hash trees, live sliding-window chunk addressing, Unified Merkle Tree signatures for low-latency live streams, mutual peer authentication without centralized certificate authorities, and native UDP hole punching. This specification defines the wire framing, stream mapping, swarm discovery headers, real-time object prioritization, and security properties required to operate HTTP/4 natively across decentralized networks.},
+}
 ```
