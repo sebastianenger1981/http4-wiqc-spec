@@ -1,0 +1,974 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head profile="http://www.w3.org/2006/03/hcard http://dublincore.org/documents/2008/08/04/dc-html/">
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+
+  <title>HTTP/4: Mapping HTTP Semantics over the WIQC Decentralized Real-Time Torrent Transport Protocol</title>
+
+  <style type="text/css" title="Xml2Rfc (sans serif)">
+  /*<![CDATA[*/
+	  a {
+	  text-decoration: none;
+	  }
+      /* info code from SantaKlauss at http://www.madaboutstyle.com/tooltip2.html */
+      a.info {
+          /* This is the key. */
+          position: relative;
+          z-index: 24;
+          text-decoration: none;
+      }
+      a.info:hover {
+          z-index: 25;
+          color: #FFF; background-color: #900;
+      }
+      a.info span { display: none; }
+      a.info:hover span.info {
+          /* The span will display just on :hover state. */
+          display: block;
+          position: absolute;
+          font-size: smaller;
+          top: 2em; left: -5em; width: 15em;
+          padding: 2px; border: 1px solid #333;
+          color: #900; background-color: #EEE;
+          text-align: left;
+      }
+	  a.smpl {
+	  color: black;
+	  }
+	  a:hover {
+	  text-decoration: underline;
+	  }
+	  a:active {
+	  text-decoration: underline;
+	  }
+	  address {
+	  margin-top: 1em;
+	  margin-left: 2em;
+	  font-style: normal;
+	  }
+	  body {
+	  color: black;
+	  font-family: verdana, helvetica, arial, sans-serif;
+	  font-size: 10pt;
+	  max-width: 55em;
+	  
+	  }
+	  cite {
+	  font-style: normal;
+	  }
+	  dd {
+	  margin-right: 2em;
+	  }
+	  dl {
+	  margin-left: 2em;
+	  }
+	
+	  ul.empty {
+	  list-style-type: none;
+	  }
+	  ul.empty li {
+	  margin-top: .5em;
+	  }
+	  dl p {
+	  margin-left: 0em;
+	  }
+	  dt {
+	  margin-top: .5em;
+	  }
+	  h1 {
+	  font-size: 14pt;
+	  line-height: 21pt;
+	  page-break-after: avoid;
+	  }
+	  h1.np {
+	  page-break-before: always;
+	  }
+	  h1 a {
+	  color: #333333;
+	  }
+	  h2 {
+	  font-size: 12pt;
+	  line-height: 15pt;
+	  page-break-after: avoid;
+	  }
+	  h3, h4, h5, h6 {
+	  font-size: 10pt;
+	  page-break-after: avoid;
+	  }
+	  h2 a, h3 a, h4 a, h5 a, h6 a {
+	  color: black;
+	  }
+	  img {
+	  margin-left: 3em;
+	  }
+	  li {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol p {
+	  margin-left: 0em;
+	  }
+	  p {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  pre {
+	  margin-left: 3em;
+	  background-color: lightyellow;
+	  padding: .25em;
+	  }
+	  pre.text2 {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f0f0f0;
+	  width: 69em;
+	  }
+	  pre.inline {
+	  background-color: white;
+	  padding: 0em;
+	  }
+	  pre.text {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  width: 69em;
+	  }
+	  pre.drawing {
+	  border-style: solid;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  padding: 2em;
+	  }
+	  table {
+	  margin-left: 2em;
+	  }
+	  table.tt {
+	  vertical-align: top;
+	  }
+	  table.full {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.headers {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.tt td {
+	  vertical-align: top;
+	  }
+	  table.full td {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.tt th {
+	  vertical-align: top;
+	  }
+	  table.full th {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.headers th {
+	  border-style: none none inset none;
+	  border-width: 1px;
+	  }
+	  table.left {
+	  margin-right: auto;
+	  }
+	  table.right {
+	  margin-left: auto;
+	  }
+	  table.center {
+	  margin-left: auto;
+	  margin-right: auto;
+	  }
+	  caption {
+	  caption-side: bottom;
+	  font-weight: bold;
+	  font-size: 9pt;
+	  margin-top: .5em;
+	  }
+	
+	  table.header {
+	  border-spacing: 1px;
+	  width: 95%;
+	  font-size: 10pt;
+	  color: white;
+	  }
+	  td.top {
+	  vertical-align: top;
+	  }
+	  td.topnowrap {
+	  vertical-align: top;
+	  white-space: nowrap; 
+	  }
+	  table.header td {
+	  background-color: gray;
+	  width: 50%;
+	  }
+	  table.header a {
+	  color: white;
+	  }
+	  td.reference {
+	  vertical-align: top;
+	  white-space: nowrap;
+	  padding-right: 1em;
+	  }
+	  thead {
+	  display:table-header-group;
+	  }
+	  ul.toc, ul.toc ul {
+	  list-style: none;
+	  margin-left: 1.5em;
+	  margin-right: 0em;
+	  padding-left: 0em;
+	  }
+	  ul.toc li {
+	  line-height: 150%;
+	  font-weight: bold;
+	  font-size: 10pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  ul.toc li li {
+	  line-height: normal;
+	  font-weight: normal;
+	  font-size: 9pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  li.excluded {
+	  font-size: 0pt;
+	  }
+	  ul p {
+	  margin-left: 0em;
+	  }
+	
+	  .comment {
+	  background-color: yellow;
+	  }
+	  .center {
+	  text-align: center;
+	  }
+	  .error {
+	  color: red;
+	  font-style: italic;
+	  font-weight: bold;
+	  }
+	  .figure {
+	  font-weight: bold;
+	  text-align: center;
+	  font-size: 9pt;
+	  }
+	  .filename {
+	  color: #333333;
+	  font-weight: bold;
+	  font-size: 12pt;
+	  line-height: 21pt;
+	  text-align: center;
+	  }
+	  .fn {
+	  font-weight: bold;
+	  }
+	  .hidden {
+	  display: none;
+	  }
+	  .left {
+	  text-align: left;
+	  }
+	  .right {
+	  text-align: right;
+	  }
+	  .title {
+	  color: #990000;
+	  font-size: 18pt;
+	  line-height: 18pt;
+	  font-weight: bold;
+	  text-align: center;
+	  margin-top: 36pt;
+	  }
+	  .vcardline {
+	  display: block;
+	  }
+	  .warning {
+	  font-size: 14pt;
+	  background-color: yellow;
+	  }
+	
+	
+	  @media print {
+	  .noprint {
+		display: none;
+	  }
+	
+	  a {
+		color: black;
+		text-decoration: none;
+	  }
+	
+	  table.header {
+		width: 90%;
+	  }
+	
+	  td.header {
+		width: 50%;
+		color: black;
+		background-color: white;
+		vertical-align: top;
+		font-size: 12pt;
+	  }
+	
+	  ul.toc a::after {
+		content: leader('.') target-counter(attr(href), page);
+	  }
+	
+	  ul.ind li li a {
+		content: target-counter(attr(href), page);
+	  }
+	
+	  .print2col {
+		column-count: 2;
+		-moz-column-count: 2;
+		column-fill: auto;
+	  }
+	  }
+	
+	  @page {
+	  @top-left {
+		   content: "Internet-Draft"; 
+	  } 
+	  @top-right {
+		   content: "December 2010"; 
+	  } 
+	  @top-center {
+		   content: "Abbreviated Title";
+	  } 
+	  @bottom-left {
+		   content: "Doe"; 
+	  } 
+	  @bottom-center {
+		   content: "Expires June 2011"; 
+	  } 
+	  @bottom-right {
+		   content: "[Page " counter(page) "]"; 
+	  } 
+	  }
+	
+	  @page:first { 
+		@top-left {
+		  content: normal;
+		}
+		@top-right {
+		  content: normal;
+		}
+		@top-center {
+		  content: normal;
+		}
+	  }
+  /*]]>*/
+  </style>
+
+  <link href="#rfc.toc" rel="Contents">
+<link href="#rfc.section.1" rel="Chapter" title="1 Introduction">
+<link href="#rfc.section.2" rel="Chapter" title="2 Conventions and Definitions">
+<link href="#rfc.section.3" rel="Chapter" title="3 The WIQC Transport Protocol Architecture">
+<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Relationship to QUIC and Peer-to-Peer Swarming">
+<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Swarm Handshake and Channel Multiplexing">
+<link href="#rfc.section.3.3" rel="Chapter" title="3.3 Cryptographic Integrity: Static and Live Torrent Modes">
+<link href="#rfc.section.4" rel="Chapter" title="4 Real-Time Streaming and Swarm Scheduling in HTTP/4">
+<link href="#rfc.section.4.1" rel="Chapter" title="4.1 Media Data Model Mapping">
+<link href="#rfc.section.4.2" rel="Chapter" title="4.2 Hybrid Earliest Deadline First (EDF) and Rarest-First Scheduling">
+<link href="#rfc.section.5" rel="Chapter" title="5 Expressing HTTP Semantics over WIQC">
+<link href="#rfc.section.5.1" rel="Chapter" title="5.1 HTTP/4 Stream Mapping">
+<link href="#rfc.section.5.2" rel="Chapter" title="5.2 HTTP/4 Frame Layout and Extensions">
+<link href="#rfc.section.5.3" rel="Chapter" title="5.3 HTTP Header Fields for Swarm Integrity and Origin Authentication">
+<link href="#rfc.section.6" rel="Chapter" title="6 Decentralized Peer Authentication and NAT Traversal">
+<link href="#rfc.section.6.1" rel="Chapter" title="6.1 Mutual TLS 1.3 with Self-Signed Peer Identity">
+<link href="#rfc.section.6.2" rel="Chapter" title="6.2 Native WIQC NAT Traversal">
+<link href="#rfc.section.7" rel="Chapter" title="7 Formal Syntax (ABNF)">
+<link href="#rfc.section.8" rel="Chapter" title="8 Security Considerations">
+<link href="#rfc.section.8.1" rel="Chapter" title="8.1 Stream Pollution Attacks in Decentralized Swarms">
+<link href="#rfc.section.8.2" rel="Chapter" title="8.2 Reflection and Amplification Attacks">
+<link href="#rfc.section.8.3" rel="Chapter" title="8.3 Compression Side Channels and Replay Risks">
+<link href="#rfc.section.9" rel="Chapter" title="9 IANA Considerations">
+<link href="#rfc.section.9.1" rel="Chapter" title="9.1 ALPN Protocol ID Registration">
+<link href="#rfc.section.9.2" rel="Chapter" title="9.2 HTTP Header Field Registration">
+<link href="#rfc.references" rel="Chapter" title="10 References">
+<link href="#rfc.references.1" rel="Chapter" title="10.1 Normative References">
+<link href="#rfc.references.2" rel="Chapter" title="10.2 Informative References">
+<link href="#rfc.appendix.A" rel="Chapter" title="A Acknowledgements">
+<link href="#rfc.authors" rel="Chapter">
+
+
+  <meta name="generator" content="xml2rfc version 2.40.0 - https://tools.ietf.org/tools/xml2rfc" />
+  <link rel="schema.dct" href="http://purl.org/dc/terms/" />
+
+  <meta name="dct.creator" content="Enger, S." />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-enger-httpbis-http4-wiqc-00" />
+  <meta name="dct.issued" scheme="ISO8601" content="2026-11-18" />
+  <meta name="dct.abstract" content="This document specifies HTTP/4, an application-layer mapping of HTTP semantics over a decentralized, peer-to-peer real-time streaming transport protocol named WIQC (Web-Integrated QUIC-derived Content-swarming). By design, the HTTP/4 protocol allows decentralized real-time streaming via a torrent protocol called not QUIC but WIQC. While HTTP/3 delegates stream multiplexing and congestion control to unicast client-server QUIC connections, HTTP/4 extends these capabilities to multipoint peer swarms. WIQC integrates encrypted UDP stream multiplexing with fine-grained cryptographic block verification using SHA-256 Merkle hash trees, live sliding-window chunk addressing, Unified Merkle Tree signatures for low-latency live streams, mutual peer authentication without centralized certificate authorities, and native UDP hole punching.  This specification defines the wire framing, stream mapping, swarm discovery headers, real-time object prioritization, and security properties required to operate HTTP/4 natively across decentralized networks. " />
+  <meta name="description" content="This document specifies HTTP/4, an application-layer mapping of HTTP semantics over a decentralized, peer-to-peer real-time streaming transport protocol named WIQC (Web-Integrated QUIC-derived Content-swarming). By design, the HTTP/4 protocol allows decentralized real-time streaming via a torrent protocol called not QUIC but WIQC. While HTTP/3 delegates stream multiplexing and congestion control to unicast client-server QUIC connections, HTTP/4 extends these capabilities to multipoint peer swarms. WIQC integrates encrypted UDP stream multiplexing with fine-grained cryptographic block verification using SHA-256 Merkle hash trees, live sliding-window chunk addressing, Unified Merkle Tree signatures for low-latency live streams, mutual peer authentication without centralized certificate authorities, and native UDP hole punching.  This specification defines the wire framing, stream mapping, swarm discovery headers, real-time object prioritization, and security properties required to operate HTTP/4 natively across decentralized networks. " />
+
+</head>
+
+<body>
+
+  <table class="header">
+    <tbody>
+    
+    	<tr>
+<td class="left">HTTP Working Group</td>
+<td class="right">S. Enger</td>
+</tr>
+<tr>
+<td class="left">Internet-Draft</td>
+<td class="right">ESE</td>
+</tr>
+<tr>
+<td class="left">Intended status: Experimental</td>
+<td class="right">November 18, 2026</td>
+</tr>
+<tr>
+<td class="left">Expires: May 22, 2027</td>
+<td class="right"></td>
+</tr>
+
+    	
+    </tbody>
+  </table>
+
+  <p class="title">HTTP/4: Mapping HTTP Semantics over the WIQC Decentralized Real-Time Torrent Transport Protocol<br />
+  <span class="filename">draft-enger-httpbis-http4-wiqc-00</span></p>
+  
+  <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
+<p>This document specifies HTTP/4, an application-layer mapping of HTTP semantics over a decentralized, peer-to-peer real-time streaming transport protocol named WIQC (Web-Integrated QUIC-derived Content-swarming). By design, the HTTP/4 protocol allows decentralized real-time streaming via a torrent protocol called not QUIC but WIQC. While HTTP/3 delegates stream multiplexing and congestion control to unicast client-server QUIC connections, HTTP/4 extends these capabilities to multipoint peer swarms. WIQC integrates encrypted UDP stream multiplexing with fine-grained cryptographic block verification using SHA-256 Merkle hash trees, live sliding-window chunk addressing, Unified Merkle Tree signatures for low-latency live streams, mutual peer authentication without centralized certificate authorities, and native UDP hole punching.  This specification defines the wire framing, stream mapping, swarm discovery headers, real-time object prioritization, and security properties required to operate HTTP/4 natively across decentralized networks.</p>
+<h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
+<p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
+<p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
+<p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
+<p>This Internet-Draft will expire on May 22, 2027.</p>
+<h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
+<p>Copyright (c) 2026 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
+<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
+<h1 id="rfc.section.1">
+<a href="#rfc.section.1">1.</a> <a href="#introduction" id="introduction">Introduction</a>
+</h1>
+<p id="rfc.section.1.p.1">The architectural evolution of the Hypertext Transfer Protocol has progressively decoupled high-level application semantics <a href="#RFC9110" class="xref">[RFC9110]</a> from underlying transport bindings. While HTTP/1.1 and HTTP/2 rely primarily on Transmission Control Protocol (TCP) connections, HTTP/3 <a href="#RFC9114" class="xref">[RFC9114]</a> maps HTTP semantics onto the QUIC transport protocol <a href="#RFC9000" class="xref">[RFC9000]</a> to eliminate transport-layer head-of-line blocking and reduce handshake latency. However, HTTP/3 remains fundamentally bound to a centralized, unicast client-server topology. Real-time media delivery and large-scale content distribution over HTTP/3 still require centralized Content Delivery Network (CDN) relay infrastructures <a href="#I-D.ietf-moq-transport" class="xref">[I-D.ietf-moq-transport]</a>.</p>
+<p id="rfc.section.1.p.2">This document establishes the foundational mandate for the next generation of web transport:</p>
+<p id="rfc.section.1.p.3">The HTTP/4 protocol will allow decentralized real time streaming via torrent protocol called not QUIC but WIQC.</p>
+<p id="rfc.section.1.p.4">To fulfill this mandate, this specification defines WIQC (Web-Integrated QUIC-derived Content-swarming) as the underlying transport layer for HTTP/4. Rather than treating a resource origin as a single IP endpoint, HTTP/4 treats content representations and live media tracks as cryptographically verifiable swarms. Peers participating in an HTTP/4 exchange simultaneously act as consumers and relays, exchanging independent streams and unreliable datagrams <a href="#RFC9221" class="xref">[RFC9221]</a> across a decentralized mesh.</p>
+<p id="rfc.section.1.p.5">WIQC synthesizes four core protocol mechanisms into a unified transport layer:</p>
+<p></p>
+
+<ol>
+<li>Multiplexed Encrypted Framing: Derived from <a href="#RFC9000" class="xref">[RFC9000]</a>, providing connection migration, 0-RTT/1-RTT setup, and independent per-stream flow control.</li>
+<li>Real-Time Swarm Integrity and Torrent Framing: Incorporating the bin-based chunk addressing, Live Discard Window, and Unified Merkle Tree live signature mechanisms of the Peer-to-Peer Streaming Peer Protocol (PPSPP) <a href="#RFC7574" class="xref">[RFC7574]</a> alongside the 16 KiB SHA-256 Merkle leaf verification of BitTorrent v2 <a href="#BEP52" class="xref">[BEP52]</a>.</li>
+<li>Sub-Second Media Hierarchy: Adapting the Track, Group, Subgroup, and Object data model of Media over QUIC Transport <a href="#I-D.ietf-moq-transport" class="xref">[I-D.ietf-moq-transport]</a> so that each Subgroup maps to an independent unidirectional WIQC stream for immediate peer-to-peer forwarding and Earliest Deadline First (EDF) scheduling.</li>
+<li>Decentralized Mutual Authentication and NAT Traversal: Utilizing self-signed X.509 certificates carrying the libp2p Public Key Extension <a href="#LIBP2P-TLS" class="xref">[LIBP2P-TLS]</a> over TLS 1.3 <a href="#RFC9846" class="xref">[RFC9846]</a> and native path-probing frames <a href="#I-D.seemann-quic-nat-traversal" class="xref">[I-D.seemann-quic-nat-traversal]</a> to establish direct peer-to-peer paths across Network Address Translators (NATs).</li>
+</ol>
+<h1 id="rfc.section.2">
+<a href="#rfc.section.2">2.</a> <a href="#conventions-and-definitions" id="conventions-and-definitions">Conventions and Definitions</a>
+</h1>
+<p id="rfc.section.2.p.1">The key words &#8220;MUST&#8221;, &#8220;MUST NOT&#8221;, &#8220;REQUIRED&#8221;, &#8220;SHALL&#8221;, &#8220;SHALL NOT&#8221;, &#8220;SHOULD&#8221;, &#8220;SHOULD NOT&#8221;, &#8220;RECOMMENDED&#8221;, &#8220;NOT RECOMMENDED&#8221;, &#8220;MAY&#8221;, and &#8220;OPTIONAL&#8221; in this document are to be interpreted as described in BCP 14 <a href="#RFC2119" class="xref">[RFC2119]</a> <a href="#RFC8174" class="xref">[RFC8174]</a> when, and only when, they appear in all capitals, as shown here.</p>
+<p id="rfc.section.2.p.2">This document uses the variable-length integer encoding and packet formatting conventions defined in Section 1.3 of <a href="#RFC9000" class="xref">[RFC9000]</a>.</p>
+<p id="rfc.section.2.p.3">The following terms are used throughout this specification:</p>
+<p></p>
+
+<ul>
+<li>WIQC Endpoint: A network node implementing the WIQC transport protocol capable of simultaneously initiating and accepting swarm streams as both an HTTP/4 client (subscriber/leecher) and an HTTP/4 peer server (publisher/seeder).</li>
+<li>Swarm Identifier (Swarm ID): A cryptographic identifier uniquely representing an HTTP/4 resource or live stream. For static representations, the Swarm ID is the 32-byte SHA-256 Merkle root (pieces root) <a href="#BEP52" class="xref">[BEP52]</a>. For live streams, the Swarm ID is the public key fingerprint of the origin publisher <a href="#RFC7574" class="xref">[RFC7574]</a>.</li>
+<li>Leaf Block: The smallest unit of cryptographic verification in WIQC, fixed at 16 KiB (16,384 bytes) in accordance with <a href="#BEP52" class="xref">[BEP52]</a>.</li>
+<li>Munro Hash: An interior node root of a power-of-two subtree within a Unified Merkle Tree <a href="#RFC7574" class="xref">[RFC7574]</a> that is cryptographically signed by the live origin publisher via a SIGNED_INTEGRITY frame to authenticate dynamically generated live streaming chunks.</li>
+<li>Subgroup Stream: A unidirectional WIQC stream carrying a sequence of media or data Objects that share a delivery priority and decoding dependency <a href="#I-D.ietf-moq-transport" class="xref">[I-D.ietf-moq-transport]</a>.</li>
+</ul>
+<h1 id="rfc.section.3">
+<a href="#rfc.section.3">3.</a> <a href="#the-wiqc-transport-protocol-architecture" id="the-wiqc-transport-protocol-architecture">The WIQC Transport Protocol Architecture</a>
+</h1>
+<h1 id="rfc.section.3.1">
+<a href="#rfc.section.3.1">3.1.</a> <a href="#relationship-to-quic-and-peer-to-peer-swarming" id="relationship-to-quic-and-peer-to-peer-swarming">Relationship to QUIC and Peer-to-Peer Swarming</a>
+</h1>
+<p id="rfc.section.3.1.p.1">WIQC preserves the UDP packet framing, long and short headers, connection IDs, and per-stream reliability mechanisms of <a href="#RFC9000" class="xref">[RFC9000]</a>, but replaces the asymmetric client-server session model with a symmetric swarm channel model. A single HTTP/4 logical request can be satisfied concurrently by multiple WIQC connections to distinct peers participating in the same Swarm ID.</p>
+<p id="rfc.section.3.1.p.2">Figure 1 illustrates the architectural layering of HTTP/4 over WIQC compared to HTTP/2 and HTTP/3:</p>
+<div id="rfc.figure.1"></div>
+<div id="fig-protocol-stack"></div>
+<pre>
++----------------------------------------------------------------+
+|                   HTTP Semantics (RFC 9110)                    |
++-------------------+--------------------+-----------------------+
+| HTTP/2 (RFC 9113) | HTTP/3 (RFC 9114)  |   HTTP/4 over WIQC    |
++-------------------+--------------------+-----------------------+
+|   HPACK Framing   | QPACK + H3 Frames  | QPACK + RFC 9421 Sig. |
++-------------------+--------------------+-----------------------+
+| TLS 1.2/1.3 (PKIX)| QUIC Streams(9000) | MOQT Subgroups + EDF  |
++-------------------+--------------------+-----------------------+
+| TCP (Single Stream| TLS 1.3 (CA PKIX)  | WIQC Swarm (RFC7574)  |
++-------------------+--------------------+-----------------------+
+|    IP / Unicast   |    UDP / Unicast   | Mutual TLS 1.3        |
++-------------------+--------------------+-----------------------+
+|                   |                    | UDP + Hole Punching   |
++-------------------+--------------------+-----------------------+
+</pre>
+<p class="figure">Figure 1: HTTP/4 over WIQC Protocol Stack Comparison</p>
+<h1 id="rfc.section.3.2">
+<a href="#rfc.section.3.2">3.2.</a> <a href="#swarm-handshake-and-channel-multiplexing" id="swarm-handshake-and-channel-multiplexing">Swarm Handshake and Channel Multiplexing</a>
+</h1>
+<p id="rfc.section.3.2.p.1">During connection establishment or stream initialization, WIQC endpoints exchange swarm capabilities derived from <a href="#RFC7574" class="xref">[RFC7574]</a> and <a href="#BEP52" class="xref">[BEP52]</a>:</p>
+<p></p>
+
+<ol>
+<li>Swarm Metadata Negotiation: Endpoints negotiate the Swarm Identifier (Option Code 2), Content Integrity Protection Method (Option Code 3), Merkle Hash Tree Function (Option Code 4, fixed to SHA-256, code 0x02), Chunk Addressing Method (Option Code 6, defaulting to 64-bit bins, code 0x03), and Live Discard Window (Option Code 7) as defined in <a href="#RFC7574" class="xref">[RFC7574]</a>.</li>
+<li>Anti-Amplification Rule: In accordance with <a href="#RFC7574" class="xref">[RFC7574]</a> and <a href="#RFC9000" class="xref">[RFC9000]</a>, an initiating peer&#8217;s first flight MUST NOT contain heavy payloads (such as DATA or SIGNED_INTEGRITY frames) prior to address validation via channel ID echoing or QUIC PATH_RESPONSE verification.</li>
+</ol>
+<h1 id="rfc.section.3.3">
+<a href="#rfc.section.3.3">3.3.</a> <a href="#cryptographic-integrity-static-and-live-torrent-modes" id="cryptographic-integrity-static-and-live-torrent-modes">Cryptographic Integrity: Static and Live Torrent Modes</a>
+</h1>
+<p id="rfc.section.3.3.p.1">Because HTTP/4 peers receive byte ranges and real-time media frames from untrusted swarm participants, transport-level TLS 1.3 encryption <a href="#RFC9846" class="xref">[RFC9846]</a> only protects the hop-by-hop channel. End-to-end content integrity MUST be verified at the block or object level before data is passed to the HTTP/4 application or forwarded to other peers:</p>
+<p></p>
+
+<ul>
+<li>Static Content Mode (BEP 52 Merkle Mode): Content is divided into 16 KiB leaf blocks hashed with SHA-256 into a binary Merkle tree <a href="#BEP52" class="xref">[BEP52]</a>. Peers exchange standard peer wire protocol messages (IDs 21, 22, and 23 for hash request, hashes, and hash reject) to fetch missing uncle hashes required to verify a 16 KiB block immediately upon arrival. Corrupt blocks are discarded immediately, and the offending peer is isolated.</li>
+<li>Decentralized Real-Time Streaming Mode (Unified Merkle Tree Mode): Since the total stream length is unknown ahead of time in live streaming, WIQC utilizes Content Integrity Protection Method 3 (Unified Merkle Tree) from <a href="#RFC7574" class="xref">[RFC7574]</a>. As the publisher generates new groups of real-time chunks, it computes the binary subtree root (the munro hash) covering the newly generated bin range, signs the munro hash using its private key, and distributes SIGNED_INTEGRITY and INTEGRITY frames across the swarm. Receiving peers verify each chunk against its munro branch before playback and immediately re-seed verified chunks to downstream peers.</li>
+</ul>
+<h1 id="rfc.section.4">
+<a href="#rfc.section.4">4.</a> <a href="#real-time-streaming-and-swarm-scheduling-in-http4" id="real-time-streaming-and-swarm-scheduling-in-http4">Real-Time Streaming and Swarm Scheduling in HTTP/4</a>
+</h1>
+<h1 id="rfc.section.4.1">
+<a href="#rfc.section.4.1">4.1.</a> <a href="#media-data-model-mapping" id="media-data-model-mapping">Media Data Model Mapping</a>
+</h1>
+<p id="rfc.section.4.1.p.1">To achieve sub-second real-time latency across a decentralized torrent swarm, HTTP/4 adopts the hierarchical data model of <a href="#I-D.ietf-moq-transport" class="xref">[I-D.ietf-moq-transport]</a>:</p>
+<p></p>
+
+<ul>
+<li>Track: Identified by a tuple of Track Namespace (bound to the HTTP/4 :authority and :path pseudo-headers) and Track Name (e.g., video bitrate variant, audio channel, or catalog track).</li>
+<li>Group: A temporally bounded collection of objects starting at an independent synchronization point (such as an IDR keyframe), directly aligned with a WIQC Unified Merkle Tree munro subtree.</li>
+<li>Subgroup: A subset of objects within a Group sharing a common priority and dependency chain. Each Subgroup MUST be mapped to exactly one unidirectional WIQC stream. If packet loss occurs on a lower-priority enhancement layer Subgroup, higher-priority base layer Subgroups proceed without head-of-line blocking.</li>
+<li>Object: The smallest addressable media unit (e.g., a single encoded video frame or Low Overhead Container (LOC) payload).</li>
+</ul>
+<h1 id="rfc.section.4.2">
+<a href="#rfc.section.4.2">4.2.</a> <a href="#hybrid-earliest-deadline-first-edf-and-rarest-first-scheduling" id="hybrid-earliest-deadline-first-edf-and-rarest-first-scheduling">Hybrid Earliest Deadline First (EDF) and Rarest-First Scheduling</a>
+</h1>
+<p id="rfc.section.4.2.p.1">Traditional torrent protocols rely purely on Rarest-First piece selection, which maximizes swarm diversity but ignores playback deadlines. Conversely, purely sequential fetching causes swarm starvation.  WIQC endpoints implementing HTTP/4 real-time streaming MUST implement a dual-zone sliding window scheduler within the negotiated Live Discard Window <a href="#RFC7574" class="xref">[RFC7574]</a>, extending HTTP priority signaling <a href="#RFC9218" class="xref">[RFC9218]</a>:</p>
+<p></p>
+
+<ol>
+<li>Emergency Priority Zone (EDF Zone): For chunks whose playback deadline falls within a configurable threshold (e.g., &lt; 150 ms), the peer requests missing Subgroups strictly in Earliest Deadline First (EDF) order from the lowest-RTT unchoked peers.</li>
+<li>Swarm Health Zone (Rarest-First Zone): For chunks further ahead in the Live Discard Window, the peer uses remaining bandwidth to request the rarest chunks announced via HAVE frames, ensuring robust piece availability across the swarm.</li>
+</ol>
+<p id="rfc.section.4.2.p.3">Figure 2 depicts the dual-zone sliding window scheduler and wire-level frame multiplexing in WIQC:</p>
+<div id="rfc.figure.2"></div>
+<div id="fig-scheduler-pipeline"></div>
+<pre>
+|&lt;---------------- Live Discard Window (RFC 7574) ---------------&gt;|
++---------------------------------+-------------------------------+
+|  Emergency Zone (&lt; 150 ms)      |     Swarm Health Zone         |
+|  Scheduler: Strictly EDF        |     Scheduler: Rarest-First   |
+|  Target: Lowest-RTT Peers       |     Target: HAVE Bin Diversity|
++---------------------------------+-------------------------------+
+        |                                         |
+        v                                         v
++-----------------------------------------------------------------+
+| WIQC Subgroup Stream (0x40): [MOQT Object] + [WIQC_INTEGRITY]   |
+| WIQC Swarm Control   (0x41): [WIQC_HAVE]   + [SIGNED_INTEGRITY] |
++-----------------------------------------------------------------+
+</pre>
+<p class="figure">Figure 2: WIQC Dual-Zone Real-Time Swarm Scheduler and Stream Pipeline</p>
+<h1 id="rfc.section.5">
+<a href="#rfc.section.5">5.</a> <a href="#expressing-http-semantics-over-wiqc" id="expressing-http-semantics-over-wiqc">Expressing HTTP Semantics over WIQC</a>
+</h1>
+<h1 id="rfc.section.5.1">
+<a href="#rfc.section.5.1">5.1.</a> <a href="#http4-stream-mapping" id="http4-stream-mapping">HTTP/4 Stream Mapping</a>
+</h1>
+<p id="rfc.section.5.1.p.1">HTTP/4 preserves the stream categories of <a href="#RFC9114" class="xref">[RFC9114]</a> while introducing swarm-specific stream types:</p>
+<table cellpadding="3" cellspacing="0" class="tt full center">
+<thead><tr>
+<th class="left">Stream Type ID</th>
+<th class="left">Stream Name</th>
+<th class="left">Directionality</th>
+<th class="left">Purpose in HTTP/4 over WIQC</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="left">0x00</td>
+<td class="left">Control Stream</td>
+<td class="left">Unidirectional (pair)</td>
+<td class="left">Carries SETTINGS, GOAWAY, MAX_PUSH_ID, and swarm capabilities.</td>
+</tr>
+<tr>
+<td class="left">0x01</td>
+<td class="left">Push Stream</td>
+<td class="left">Unidirectional</td>
+<td class="left">Server- or peer-initiated push of promised HTTP/4 representations.</td>
+</tr>
+<tr>
+<td class="left">0x02</td>
+<td class="left">QPACK Encoder</td>
+<td class="left">Unidirectional</td>
+<td class="left">Dynamic header table insertions per <a href="#RFC9204" class="xref">[RFC9204]</a>.</td>
+</tr>
+<tr>
+<td class="left">0x03</td>
+<td class="left">QPACK Decoder</td>
+<td class="left">Unidirectional</td>
+<td class="left">Header table acknowledgments and stream cancellations per <a href="#RFC9204" class="xref">[RFC9204]</a>.</td>
+</tr>
+<tr>
+<td class="left">0x40</td>
+<td class="left">WIQC Swarm Subgroup</td>
+<td class="left">Unidirectional</td>
+<td class="left">Carries a single real-time media Subgroup alongside its Merkle INTEGRITY proof.</td>
+</tr>
+<tr>
+<td class="left">0x41</td>
+<td class="left">WIQC Swarm Control</td>
+<td class="left">Bidirectional</td>
+<td class="left">Exchanges HAVE, REQUEST, CANCEL, CHOKE, UNCHOKE, and SIGNED_INTEGRITY frames.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="rfc.section.5.2">
+<a href="#rfc.section.5.2">5.2.</a> <a href="#http4-frame-layout-and-extensions" id="http4-frame-layout-and-extensions">HTTP/4 Frame Layout and Extensions</a>
+</h1>
+<p id="rfc.section.5.2.p.1">All HTTP/4 frames follow the variable-length integer framing layout of Section 7.1 of <a href="#RFC9114" class="xref">[RFC9114]</a>: Type (i), Length (i), and Frame Payload (..).  In addition to DATA (0x00), HEADERS (0x01), CANCEL_PUSH (0x03), SETTINGS (0x04), PUSH_PROMISE (0x05), GOAWAY (0x07), and MAX_PUSH_ID (0x0d), HTTP/4 defines the following WIQC swarm frames:</p>
+<table cellpadding="3" cellspacing="0" class="tt full center">
+<thead><tr>
+<th class="left">Frame Type</th>
+<th class="left">Frame Name</th>
+<th class="left">Permitted Streams</th>
+<th class="left">Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="left">0x4101</td>
+<td class="left">WIQC_HAVE</td>
+<td class="left">WIQC Swarm Control</td>
+<td class="left">Announces possession of verified 64-bit bin ranges <a href="#RFC7574" class="xref">[RFC7574]</a>.</td>
+</tr>
+<tr>
+<td class="left">0x4102</td>
+<td class="left">WIQC_INTEGRITY</td>
+<td class="left">WIQC Swarm Subgroup / Control</td>
+<td class="left">Carries uncle hashes or Merkle branch proofs <a href="#RFC7574" class="xref">[RFC7574]</a> <a href="#BEP52" class="xref">[BEP52]</a>.</td>
+</tr>
+<tr>
+<td class="left">0x4103</td>
+<td class="left">WIQC_SIGNED_INTEGRITY</td>
+<td class="left">WIQC Swarm Subgroup / Control</td>
+<td class="left">Carries publisher-signed munro root hashes for live streaming <a href="#RFC7574" class="xref">[RFC7574]</a>.</td>
+</tr>
+<tr>
+<td class="left">0x4104</td>
+<td class="left">WIQC_PEX</td>
+<td class="left">Control / WIQC Swarm Control</td>
+<td class="left">Peer Exchange (PEX_RESv4, PEX_RESv6, PEX_REQ) for trackerless discovery <a href="#RFC7574" class="xref">[RFC7574]</a>.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="rfc.section.5.3">
+<a href="#rfc.section.5.3">5.3.</a> <a href="#http-header-fields-for-swarm-integrity-and-origin-authentication" id="http-header-fields-for-swarm-integrity-and-origin-authentication">HTTP Header Fields for Swarm Integrity and Origin Authentication</a>
+</h1>
+<p id="rfc.section.5.3.p.1">When initiating a request or responding over HTTP/4, endpoints combine standard HTTP integrity and signature headers with WIQC swarm metadata:</p>
+<p></p>
+
+<ol>
+<li>Representation Digest (Repr-Digest and Content-Digest): In accordance with <a href="#RFC9530" class="xref">[RFC9530]</a>, static HTTP/4 responses MUST include a Repr-Digest header encoding the SHA-256 root hash, accompanied by a Swarm-Root dictionary field carrying the BEP 52 pieces root.</li>
+<li>Origin Message Signatures (Signature-Input and Signature): Because HTTP/4 responses may be assembled from multiple untrusted peers, the origin server signs the response metadata (@status, content-type, repr-digest, and wiqc-swarm-id) using <a href="#RFC9421" class="xref">[RFC9421]</a>. Any peer in the swarm can forward the signed header block, and any receiving client can cryptographically verify that the metadata originated from the authoritative publisher.</li>
+<li>Alternative Service and Discovery: Transition from unicast HTTP/3 <a href="#RFC7838" class="xref">[RFC7838]</a> or DNS resolution via SVCB/HTTPS records <a href="#RFC9460" class="xref">[RFC9460]</a> to HTTP/4 swarms is accomplished by advertising &#8220;h4&#8221; ALPN endpoints.</li>
+<li>HTTP Datagrams and Capsule Protocol: Ultra-low-latency unreliable media objects MAY be transmitted via QUIC DATAGRAM frames <a href="#RFC9221" class="xref">[RFC9221]</a> associated with an HTTP/4 request stream, or encapsulated via the DATAGRAM Capsule (0x00) per <a href="#RFC9297" class="xref">[RFC9297]</a> when traversing HTTP intermediaries.</li>
+</ol>
+<h1 id="rfc.section.6">
+<a href="#rfc.section.6">6.</a> <a href="#decentralized-peer-authentication-and-nat-traversal" id="decentralized-peer-authentication-and-nat-traversal">Decentralized Peer Authentication and NAT Traversal</a>
+</h1>
+<h1 id="rfc.section.6.1">
+<a href="#rfc.section.6.1">6.1.</a> <a href="#mutual-tls-13-with-self-signed-peer-identity" id="mutual-tls-13-with-self-signed-peer-identity">Mutual TLS 1.3 with Self-Signed Peer Identity</a>
+</h1>
+<p id="rfc.section.6.1.p.1">In a decentralized torrent swarm, peers typically lack domain names and cannot obtain certificates from commercial PKIX Certificate Authorities (CAs). Therefore, WIQC mandates mutual authentication over TLS 1.3 <a href="#RFC9846" class="xref">[RFC9846]</a> using the libp2p TLS handshake mechanism <a href="#LIBP2P-TLS" class="xref">[LIBP2P-TLS]</a>:</p>
+<p></p>
+
+<ul>
+<li>Both dialing and listening WIQC endpoints MUST present a single self-signed X.509 certificate during the TLS 1.3 handshake (chains longer than one certificate MUST cause connection termination).</li>
+<li>The certificate MUST include the libp2p Public Key Extension identified by Object Identifier (OID) 1.3.6.1.4.1.53594.1.1.</li>
+<li>The extension contains an ASN.1-encoded SignedKey structure holding the peer&#8217;s public host key (e.g., Ed25519) and a cryptographic signature over the concatenation of the ASCII string &#8220;libp2p-tls-handshake:&#8221; and the DER-encoded SubjectPublicKeyInfo of the ephemeral certificate key.</li>
+<li>For browser-based HTTP/4 endpoints operating over WebTransport, where the browser enforces CA checks or certificate pinning, endpoints MAY authenticate peers by embedding the certificate hash (certhash) in the peer advertisement and performing an in-band cryptographic binding handshake on the first stream.</li>
+</ul>
+<h1 id="rfc.section.6.2">
+<a href="#rfc.section.6.2">6.2.</a> <a href="#native-wiqc-nat-traversal" id="native-wiqc-nat-traversal">Native WIQC NAT Traversal</a>
+</h1>
+<p id="rfc.section.6.2.p.1">To enable direct peer-to-peer streaming between home and mobile nodes behind NATs without relying on external ICE/STUN/TURN stacks, WIQC incorporates the native QUIC NAT traversal extension <a href="#I-D.seemann-quic-nat-traversal" class="xref">[I-D.seemann-quic-nat-traversal]</a>:</p>
+<p></p>
+
+<ul>
+<li>Well-connected relay or seed peers inform joining peers of their external UDP socket address using the OBSERVED_ADDRESS frame.</li>
+<li>Peers advertise candidate addresses over existing swarm connections using ADD_ADDRESS (0x3d7e90..0x3d7e91) and REMOVE_ADDRESS (0x3d7e94) frames, and coordinate simultaneous UDP hole punching via PUNCH_ME_NOW (0x3d7e92..0x3d7e93) or grant-based PUNCH_REQUEST frames followed by standard PATH_CHALLENGE and PATH_RESPONSE validation <a href="#RFC9000" class="xref">[RFC9000]</a>.</li>
+</ul>
+<h1 id="rfc.section.7">
+<a href="#rfc.section.7">7.</a> <a href="#formal-syntax-abnf" id="formal-syntax-abnf">Formal Syntax (ABNF)</a>
+</h1>
+<p id="rfc.section.7.p.1">The following Augmented Backus-Naur Form (ABNF) grammar <a href="#RFC5234" class="xref">[RFC5234]</a> defines the syntax of the WIQC-Swarm-Info HTTP header field and the h4 Alternative Service discovery token:</p>
+<pre>
+WIQC-Swarm-Info = "swarm-id=" byte-sequence ";"
+                  "mode=" ( "merkle-v2" / "unified-live" )
+                  [ ";window=" 1*DIGIT ]
+                  [ ";chunk-addr=" ( "bin32" / "bin64" ) ]
+
+byte-sequence   = ":" *( BASE64CHAR ) ":"
+BASE64CHAR      = ALPHA / DIGIT / "+" / "/" / "="
+
+h4-alpn-id      = %x68.34 ; "h4" in ASCII
+wiqc-alpn-id    = %x77.69.71.63 ; "wiqc" in ASCII
+</pre>
+<h1 id="rfc.section.8">
+<a href="#rfc.section.8">8.</a> <a href="#security-considerations" id="security-considerations">Security Considerations</a>
+</h1>
+<p id="rfc.section.8.p.1">This section analyzes the threat model of HTTP/4 over WIQC in accordance with <a href="#RFC3552" class="xref">[RFC3552]</a>.</p>
+<h1 id="rfc.section.8.1">
+<a href="#rfc.section.8.1">8.1.</a> <a href="#stream-pollution-attacks-in-decentralized-swarms" id="stream-pollution-attacks-in-decentralized-swarms">Stream Pollution Attacks in Decentralized Swarms</a>
+</h1>
+<p id="rfc.section.8.1.p.1">In peer-to-peer live streaming, a malicious peer with high upload bandwidth can inject corrupted chunks (&#8220;pollution attack&#8221;) to degrade playback across the swarm. WIQC mitigates this by enforcing mandatory cryptographic verification before forwarding: every 16 KiB block in static mode is verified against the SHA-256 Merkle root <a href="#BEP52" class="xref">[BEP52]</a>, and every live chunk in Unified Merkle Tree mode is verified against a publisher-signed munro hash <a href="#RFC7574" class="xref">[RFC7574]</a>. Merkle-tree chaining keeps cryptographic verification bandwidth overhead around 5% (as evaluated under 128-bit MD5 and 1024-bit RSA reference parameters) while enabling deterministic identification and immediate banning of polluting peers.</p>
+<h1 id="rfc.section.8.2">
+<a href="#rfc.section.8.2">8.2.</a> <a href="#reflection-and-amplification-attacks" id="reflection-and-amplification-attacks">Reflection and Amplification Attacks</a>
+</h1>
+<p id="rfc.section.8.2.p.1">Because WIQC operates over UDP, unverified source IP addresses pose a reflection amplification risk. Endpoints MUST enforce the anti-amplification limits of <a href="#RFC9000" class="xref">[RFC9000]</a> and MUST echo the peer&#8217;s randomly chosen Channel ID per Section 12.1 of <a href="#RFC7574" class="xref">[RFC7574]</a> before transmitting heavy payloads such as DATA or SIGNED_INTEGRITY messages.</p>
+<h1 id="rfc.section.8.3">
+<a href="#rfc.section.8.3">8.3.</a> <a href="#compression-side-channels-and-replay-risks" id="compression-side-channels-and-replay-risks">Compression Side Channels and Replay Risks</a>
+</h1>
+<p id="rfc.section.8.3.p.1">When using QPACK <a href="#RFC9204" class="xref">[RFC9204]</a> in HTTP/4, endpoints MUST NOT compress sensitive authentication tokens alongside attacker-controlled data within the same dynamic table context (Section 10.6 of <a href="#RFC9114" class="xref">[RFC9114]</a>).  Furthermore, 0-RTT swarm requests MUST only be used for idempotent operations (such as subscribing to public live tracks) to prevent replay attacks.</p>
+<h1 id="rfc.section.9">
+<a href="#rfc.section.9">9.</a> <a href="#iana-considerations" id="iana-considerations">IANA Considerations</a>
+</h1>
+<h1 id="rfc.section.9.1">
+<a href="#rfc.section.9.1">9.1.</a> <a href="#alpn-protocol-id-registration" id="alpn-protocol-id-registration">ALPN Protocol ID Registration</a>
+</h1>
+<p id="rfc.section.9.1.p.1">This document requests IANA to register the following Application-Layer Protocol Negotiation (ALPN) IDs in the &#8220;TLS Application-Layer Protocol Negotiation (ALPN) Protocol IDs&#8221; registry:</p>
+<p></p>
+
+<ul>
+<li>Protocol: HTTP/4 over WIQC</li>
+<li>Identification Sequence: 0x68 0x34 (&#8220;h4&#8221;)</li>
+<li>Reference: This document</li>
+<li>Protocol: Raw WIQC Swarm Transport</li>
+<li>Identification Sequence: 0x77 0x69 0x71 0x63 (&#8220;wiqc&#8221;)</li>
+<li>Reference: This document</li>
+</ul>
+<h1 id="rfc.section.9.2">
+<a href="#rfc.section.9.2">9.2.</a> <a href="#http-header-field-registration" id="http-header-field-registration">HTTP Header Field Registration</a>
+</h1>
+<p id="rfc.section.9.2.p.1">This document requests registration of the WIQC-Swarm-Info field in the &#8220;Hypertext Transfer Protocol (HTTP) Field Name Registry&#8221; per <a href="#RFC9110" class="xref">[RFC9110]</a> with status experimental.</p>
+<h1 id="rfc.references">
+<a href="#rfc.references">10.</a> References</h1>
+<h1 id="rfc.references.1">
+<a href="#rfc.references.1">10.1.</a> Normative References</h1>
+<table><tbody>
+<tr>
+<td class="reference"><b id="BEP52">[BEP52]</b></td>
+<td class="top">
+<a>Authors, B.</a>, "<a href="https://www.bittorrent.org/beps/bep_0052.html">The BitTorrent Protocol Specification v2</a>", BEP 52, September 2020.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC2119">[RFC2119]</b></td>
+<td class="top">
+<a>Bradner, S.</a>, "<a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>", BCP 14, RFC 2119, DOI 10.17487/RFC2119, March 1997.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC5234">[RFC5234]</b></td>
+<td class="top">
+<a>Crocker, D.</a> and <a>P. Overell</a>, "<a href="https://tools.ietf.org/html/rfc5234">Augmented BNF for Syntax Specifications: ABNF</a>", STD 68, RFC 5234, DOI 10.17487/RFC5234, January 2008.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC7574">[RFC7574]</b></td>
+<td class="top">
+<a>Bakker, A.</a>, <a>Petrocco, R.</a> and <a>V. Grishchenko</a>, "<a href="https://tools.ietf.org/html/rfc7574">Peer-to-Peer Streaming Peer Protocol (PPSPP)</a>", RFC 7574, DOI 10.17487/RFC7574, July 2015.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC7838">[RFC7838]</b></td>
+<td class="top">
+<a>Nottingham, M.</a>, <a>McManus, P.</a> and <a>J. Reschke</a>, "<a href="https://tools.ietf.org/html/rfc7838">HTTP Alternative Services</a>", RFC 7838, DOI 10.17487/RFC7838, April 2016.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC8174">[RFC8174]</b></td>
+<td class="top">
+<a>Leiba, B.</a>, "<a href="https://tools.ietf.org/html/rfc8174">Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</a>", BCP 14, RFC 8174, DOI 10.17487/RFC8174, May 2017.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9000">[RFC9000]</b></td>
+<td class="top">
+<a>Iyengar, J.</a> and <a>M. Thomson</a>, "<a href="https://tools.ietf.org/html/rfc9000">QUIC: A UDP-Based Multiplexed and Secure Transport</a>", RFC 9000, DOI 10.17487/RFC9000, May 2021.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9110">[RFC9110]</b></td>
+<td class="top">
+<a>Fielding, R.</a>, <a>Nottingham, M.</a> and <a>J. Reschke</a>, "<a href="https://tools.ietf.org/html/rfc9110">HTTP Semantics</a>", STD 97, RFC 9110, DOI 10.17487/RFC9110, June 2022.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9114">[RFC9114]</b></td>
+<td class="top">
+<a>Bishop, M.</a>, "<a href="https://tools.ietf.org/html/rfc9114">HTTP/3</a>", RFC 9114, DOI 10.17487/RFC9114, June 2022.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9204">[RFC9204]</b></td>
+<td class="top">
+<a>Krasic, C.</a>, <a>Bishop, M.</a> and <a>A. Frindell</a>, "<a href="https://tools.ietf.org/html/rfc9204">QPACK: Field Compression for HTTP/3</a>", RFC 9204, DOI 10.17487/RFC9204, June 2022.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9218">[RFC9218]</b></td>
+<td class="top">
+<a>Oku, K.</a> and <a>L. Pardue</a>, "<a href="https://tools.ietf.org/html/rfc9218">Extensible Prioritization Scheme for HTTP</a>", RFC 9218, DOI 10.17487/RFC9218, June 2022.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9221">[RFC9221]</b></td>
+<td class="top">
+<a>Pauly, T.</a>, <a>Kinnear, E.</a> and <a>D. Schinazi</a>, "<a href="https://tools.ietf.org/html/rfc9221">An Unreliable Datagram Extension to QUIC</a>", RFC 9221, DOI 10.17487/RFC9221, March 2022.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9297">[RFC9297]</b></td>
+<td class="top">
+<a>Schinazi, D.</a> and <a>L. Pardue</a>, "<a href="https://tools.ietf.org/html/rfc9297">HTTP Datagrams and the Capsule Protocol</a>", RFC 9297, DOI 10.17487/RFC9297, August 2022.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9421">[RFC9421]</b></td>
+<td class="top">
+<a>Backman, A.</a>, <a>Richer, J.</a> and <a>M. Sporny</a>, "<a href="https://tools.ietf.org/html/rfc9421">HTTP Message Signatures</a>", RFC 9421, DOI 10.17487/RFC9421, February 2024.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9460">[RFC9460]</b></td>
+<td class="top">
+<a>Schwartz, B.</a>, <a>Bishop, M.</a> and <a>E. Nygren</a>, "<a href="https://tools.ietf.org/html/rfc9460">Service Binding and Parameter Specification via the DNS (SVCB and HTTPS Resource Records)</a>", RFC 9460, DOI 10.17487/RFC9460, November 2023.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9530">[RFC9530]</b></td>
+<td class="top">
+<a>Polli, R.</a> and <a>L. Pardue</a>, "<a href="https://tools.ietf.org/html/rfc9530">Digest Fields</a>", RFC 9530, DOI 10.17487/RFC9530, February 2024.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC9846">[RFC9846]</b></td>
+<td class="top">
+<a>Rescorla, E.</a>, "<a href="https://tools.ietf.org/html/rfc9846">The Transport Layer Security (TLS) Protocol Version 1.3</a>", RFC 9846, DOI 10.17487/RFC9846, July 2026.</td>
+</tr>
+</tbody></table>
+<h1 id="rfc.references.2">
+<a href="#rfc.references.2">10.2.</a> Informative References</h1>
+<table><tbody>
+<tr>
+<td class="reference"><b id="I-D.ietf-moq-transport">[I-D.ietf-moq-transport]</b></td>
+<td class="top">
+<a title="Cisco">Nandakumar, S.</a>, <a title="Google">Vasiliev, V.</a>, <a title="Google">Swett, I.</a> and <a title="Meta">A. Frindell</a>, "<a href="https://tools.ietf.org/html/draft-ietf-moq-transport-23">Media over QUIC Transport</a>", Internet-Draft draft-ietf-moq-transport-23, November 2026.</td>
+</tr>
+<tr>
+<td class="reference"><b id="I-D.seemann-quic-nat-traversal">[I-D.seemann-quic-nat-traversal]</b></td>
+<td class="top">
+<a>Seemann, M.</a> and <a title="Apple Inc.">E. Kinnear</a>, "<a href="https://tools.ietf.org/html/draft-seemann-quic-nat-traversal-04">Using QUIC to traverse NATs</a>", Internet-Draft draft-seemann-quic-nat-traversal-04, November 2026.</td>
+</tr>
+<tr>
+<td class="reference"><b id="LIBP2P-TLS">[LIBP2P-TLS]</b></td>
+<td class="top">
+<a>Protocol Labs</a>, "<a href="https://github.com/libp2p/specs/blob/master/tls/tls.md">libp2p TLS 1.3 Handshake Specification</a>", 2024.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC3552">[RFC3552]</b></td>
+<td class="top">
+<a>Rescorla, E.</a> and <a>B. Korver</a>, "<a href="https://tools.ietf.org/html/rfc3552">Guidelines for Writing RFC Text on Security Considerations</a>", BCP 72, RFC 3552, DOI 10.17487/RFC3552, July 2003.</td>
+</tr>
+</tbody></table>
+<h1 id="rfc.appendix.A">
+<a href="#rfc.appendix.A">Appendix A.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a>
+</h1>
+<p id="rfc.section.A.p.1">This specification synthesizes foundational work by the IETF HTTP Working Group, the QUIC Working Group, the Media over QUIC (MOQ) Working Group, the Peer-to-Peer Streaming Protocol (PPSP) Working Group, the BitTorrent BEP 52 authors, and the libp2p specification community.</p>
+<h1 id="rfc.authors"><a href="#rfc.authors">Author's Address</a></h1>
+<div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Sebastian Enger</span> 
+	  <span class="n hidden">
+		<span class="family-name">Enger</span>
+	  </span>
+	</span>
+	<span class="org vcardline">Einzelunternehmen Sebastian Enger</span>
+	<span class="adr">
+	  <span class="vcardline">Linienstrasse 11</span>
+
+	  <span class="vcardline">
+		<span class="locality">Brandenburg an der Havel</span>,  
+		<span class="region"></span>
+		<span class="code">D-14776</span>
+	  </span>
+	  <span class="country-name vcardline">Germany</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:Sebastian.Enger@Gmail.com">Sebastian.Enger@Gmail.com</a></span>
+
+  </address>
+</div>
+  
+  <hr class="noprint" />
+  <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
+  <ul class="toc">
+
+  	<li>1.   <a href="#rfc.section.1">Introduction</a>
+</li>
+<li>2.   <a href="#rfc.section.2">Conventions and Definitions</a>
+</li>
+<li>3.   <a href="#rfc.section.3">The WIQC Transport Protocol Architecture</a>
+</li>
+<ul><li>3.1.   <a href="#rfc.section.3.1">Relationship to QUIC and Peer-to-Peer Swarming</a>
+</li>
+<li>3.2.   <a href="#rfc.section.3.2">Swarm Handshake and Channel Multiplexing</a>
+</li>
+<li>3.3.   <a href="#rfc.section.3.3">Cryptographic Integrity: Static and Live Torrent Modes</a>
+</li>
+</ul><li>4.   <a href="#rfc.section.4">Real-Time Streaming and Swarm Scheduling in HTTP/4</a>
+</li>
+<ul><li>4.1.   <a href="#rfc.section.4.1">Media Data Model Mapping</a>
+</li>
+<li>4.2.   <a href="#rfc.section.4.2">Hybrid Earliest Deadline First (EDF) and Rarest-First Scheduling</a>
+</li>
+</ul><li>5.   <a href="#rfc.section.5">Expressing HTTP Semantics over WIQC</a>
+</li>
+<ul><li>5.1.   <a href="#rfc.section.5.1">HTTP/4 Stream Mapping</a>
+</li>
+<li>5.2.   <a href="#rfc.section.5.2">HTTP/4 Frame Layout and Extensions</a>
+</li>
+<li>5.3.   <a href="#rfc.section.5.3">HTTP Header Fields for Swarm Integrity and Origin Authentication</a>
+</li>
+</ul><li>6.   <a href="#rfc.section.6">Decentralized Peer Authentication and NAT Traversal</a>
+</li>
+<ul><li>6.1.   <a href="#rfc.section.6.1">Mutual TLS 1.3 with Self-Signed Peer Identity</a>
+</li>
+<li>6.2.   <a href="#rfc.section.6.2">Native WIQC NAT Traversal</a>
+</li>
+</ul><li>7.   <a href="#rfc.section.7">Formal Syntax (ABNF)</a>
+</li>
+<li>8.   <a href="#rfc.section.8">Security Considerations</a>
+</li>
+<ul><li>8.1.   <a href="#rfc.section.8.1">Stream Pollution Attacks in Decentralized Swarms</a>
+</li>
+<li>8.2.   <a href="#rfc.section.8.2">Reflection and Amplification Attacks</a>
+</li>
+<li>8.3.   <a href="#rfc.section.8.3">Compression Side Channels and Replay Risks</a>
+</li>
+</ul><li>9.   <a href="#rfc.section.9">IANA Considerations</a>
+</li>
+<ul><li>9.1.   <a href="#rfc.section.9.1">ALPN Protocol ID Registration</a>
+</li>
+<li>9.2.   <a href="#rfc.section.9.2">HTTP Header Field Registration</a>
+</li>
+</ul><li>10.   <a href="#rfc.references">References</a>
+</li>
+<ul><li>10.1.   <a href="#rfc.references.1">Normative References</a>
+</li>
+<li>10.2.   <a href="#rfc.references.2">Informative References</a>
+</li>
+</ul><li>Appendix A.   <a href="#rfc.appendix.A">Acknowledgements</a>
+</li>
+<li><a href="#rfc.authors">Author's Address</a>
+</li>
+
+
+  </ul>
+
+  
+
+</body>
+</html>
