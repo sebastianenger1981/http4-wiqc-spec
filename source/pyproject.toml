@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "http4-wiqc-mvp"
+version = "0.1.0"
+description = "Python 3.14/3.15 MVP of HTTP/4 over WIQC (draft-enger-httpbis-http4-wiqc-00)"
+readme = "README.md"
+requires-python = ">=3.14"
+authors = [
+    { name = "Sebastian Enger", email = "Sebastian.Enger@Gmail.com" },
+]
+keywords = ["HTTP/4", "WIQC", "QUIC", "P2P", "Merkle", "MOQT", "RFC7574", "BEP52", "IETF"]
+dependencies = []
+
+[tool.setuptools.packages.find]
+include = ["http4_wiqc*"]
